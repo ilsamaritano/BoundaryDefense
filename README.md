@@ -128,14 +128,11 @@ For reproducibility:
 If you use this repository in academic work, cite the associated paper/manuscript and reference this repository.
 
 ```bibtex
-@misc{boundarydefense,
+@inproceedings{boundarydefense,
   title        = {The Intruder's Dilemma: Probabilistic 3D Boundary Defense using Brownian Acoustic Drone Swarms},
-  author       = {BoundaryDefense Authors},
+  author       = {Vincenzo Sammartino, Nathanael Denis, Omar Ibrahim, Roberto Di Pietro},
+  booktitle    = {Proceedings of the 31st European Symposium on Research in Computer Security (ESORICS) 2026},
   year         = {2026},
   note         = {Code repository}
 }
 ```
-
-## Disclaimer
-
-This repository is intended for research and simulation. Validate all assumptions and safety constraints before any real-world deployment.
