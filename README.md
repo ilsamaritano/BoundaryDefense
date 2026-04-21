@@ -129,7 +129,7 @@ If you use this repository in academic work, cite the associated paper/manuscrip
 
 ```bibtex
 @inproceedings{boundarydefense,
-  title        = {The Intruder's Dilemma: Probabilistic 3D Boundary Defense using Brownian Acoustic Drone Swarms},
+  title        = {Fight Drones with Drones: Detecting  Aerial Perimeter Intrusion with Drone-mounted Mics},
   author       = {Vincenzo Sammartino, Nathanael Denis, Omar Ibrahim, Roberto Di Pietro},
   booktitle    = {Proceedings of the 31st European Symposium on Research in Computer Security (ESORICS) 2026},
   year         = {2026},
