@@ -1,9 +1,5 @@
 # BoundaryDefense
 
-Acoustic swarm simulation and empirical pipeline for:
-
-**The Intruder's Dilemma: Probabilistic 3D Boundary Defense using Brownian Acoustic Drone Swarms**
-
 This repository combines real drone telemetry with acoustic modeling and Monte Carlo simulation to study how a defender swarm detects an intruder in 3D airspace.
 
 ## Project Overview
