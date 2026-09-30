@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- ============ SEO: primary ============ -->
+<title>Fight Drones with Drones: Acoustic Drone-Swarm Perimeter Defense (Paper)</title>
+<meta name="description" content="Drone-mounted microphones as an adaptive acoustic barrier against drone intrusions. A calibrated model on real DJI flight data shows ~40 patrolling drones can match the 99% detection of a 400+ drone static grid on a 500 × 200 m perimeter.">
+<meta name="keywords" content="drone detection, acoustic drone detection, counter-UAS, drone swarm, perimeter security, critical infrastructure protection, ego-noise cancellation, Monte Carlo simulation, airport drone security, border defense, UAV microphones, ESORICS">
+<meta name="author" content="Vincenzo Sammartino, Nathanaël Denis, Omar Ibrahim, Roberto Di Pietro">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="theme-color" content="#0b1030">
+<!-- TODO: replace YOUR-USERNAME (see README.md) -->
+<link rel="canonical" href="https://YOUR-USERNAME.github.io/BoundaryDefense/">
+
+<!-- ============ Open Graph / Twitter ============ -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Fight Drones with Drones">
+<meta property="og:title" content="Fight Drones with Drones: a swarm that listens for intruders">
+<meta property="og:description" content="~40 microphone-equipped patrol drones can seal a 500 × 200 m boundary at 99% detection, where a static grid needs 400+. Paper, results, and interactive sizing calculator.">
+<meta property="og:url" content="https://YOUR-USERNAME.github.io/BoundaryDefense/">
+<meta property="og:image" content="https://YOUR-USERNAME.github.io/BoundaryDefense/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A wall of patrolling drones with acoustic detection rings intercepting an intruder drone">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fight Drones with Drones: a swarm that listens for intruders">
+<meta name="twitter:description" content="~40 patrol drones with microphones match the 99% detection of a 400+ drone static grid. Paper + interactive calculator.">
+<meta name="twitter:image" content="https://YOUR-USERNAME.github.io/BoundaryDefense/assets/og-image.png">
+
+<!-- ============ Google Scholar / academic indexing ============ -->
+<meta name="citation_title" content="Fight Drones with Drones: Detecting Aerial Perimeter Intrusion using Drone-mounted Microphones">
+<meta name="citation_author" content="Sammartino, Vincenzo">
+<meta name="citation_author" content="Denis, Nathanaël">
+<meta name="citation_author" content="Ibrahim, Omar">
+<meta name="citation_author" content="Di Pietro, Roberto">
+<meta name="citation_publication_date" content="2026">
+<meta name="citation_pdf_url" content="https://YOUR-USERNAME.github.io/BoundaryDefense/assets/paper.pdf">
+<meta name="citation_language" content="en">
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- ============ Structured data ============ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ScholarlyArticle",
+  "name": "Fight Drones with Drones: Detecting Aerial Perimeter Intrusion using Drone-mounted Microphones",
+  "headline": "Fight Drones with Drones: Detecting Aerial Perimeter Intrusion using Drone-mounted Microphones",
+  "description": "A framework for deploying a drone swarm as an adaptive acoustic detection barrier against drone perimeter violations, calibrated on real DJI flight data.",
+  "url": "https://YOUR-USERNAME.github.io/BoundaryDefense/",
+  "image": "https://YOUR-USERNAME.github.io/BoundaryDefense/assets/og-image.png",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "keywords": ["acoustic drone detection","counter-UAS","drone swarm","perimeter security","critical infrastructure protection","ego-noise cancellation","Monte Carlo simulation"],
+  "about": ["Counter-UAS","Acoustic sensing","Critical infrastructure protection"],
+  "author": [
+    {"@type":"Person","name":"Vincenzo Sammartino","identifier":"https://orcid.org/0009-0002-4632-1179","affiliation":[{"@type":"CollegeOrUniversity","name":"King Abdullah University of Science and Technology (KAUST)"},{"@type":"CollegeOrUniversity","name":"Università di Pisa"}]},
+    {"@type":"Person","name":"Nathanaël Denis","identifier":"https://orcid.org/0000-0003-3232-7449","affiliation":{"@type":"CollegeOrUniversity","name":"King Abdullah University of Science and Technology (KAUST)"}},
+    {"@type":"Person","name":"Omar Ibrahim","identifier":"https://orcid.org/0000-0002-0171-8757","affiliation":{"@type":"CollegeOrUniversity","name":"King Abdullah University of Science and Technology (KAUST)"}},
+    {"@type":"Person","name":"Roberto Di Pietro","identifier":"https://orcid.org/0000-0003-1909-0336","affiliation":{"@type":"CollegeOrUniversity","name":"King Abdullah University of Science and Technology (KAUST)"}}
+  ],
+  "codeRepository": "https://github.com/ilsamaritano/BoundaryDefense"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Can drones detect other drones by sound?",
+     "acceptedAnswer":{"@type":"Answer","text":"Yes. Every multirotor radiates broadband propeller noise. The challenge of mounting microphones on a flying drone is its own rotor noise (ego-noise). This work uses spectral subtraction to cut the ego-noise floor by 13 dB, which extends detection range from about 2 m to 9.1 m for a Mavic Air 2 intruder at 28.8 km/h."}},
+    {"@type":"Question","name":"How many drones does it take to protect a 500 × 200 m perimeter?",
+     "acceptedAnswer":{"@type":"Answer","text":"A static gap-free grid of hovering defenders needs about 400 drones for 100% detection. Patrolling defenders at the detection-optimal speed of 35.4 km/h reach 99% detection with a fleet roughly ten times smaller. For sustained 24-hour coverage the energy-optimal patrol speed is 9.2 km/h, needing about 20 airborne drones and about 30 in total including battery rotation."}},
+    {"@type":"Question","name":"What is the Defender's Dilemma?",
+     "acceptedAnswer":{"@type":"Answer","text":"Flying faster lets a defender sweep more of the boundary, but forward flight raises its own noise floor and shrinks the range at which it can hear an intruder. Because fleet size scales with the inverse square of detection range, that lost range is expensive."}},
+    {"@type":"Question","name":"What is the best patrol speed for acoustic drone defenders?",
+     "acceptedAnswer":{"@type":"Answer","text":"It depends on mission length. Short high-alert missions favor 30–35 km/h (95% detection at 29.4 km/h and 99% at 35.4 km/h). Sustained 24-hour missions favor about 9.2 km/h, because faster flight drains batteries and inflates the total fleet."}},
+    {"@type":"Question","name":"How much does a quieter intruder change the required fleet?",
+     "acceptedAnswer":{"@type":"Answer","text":"A 6 dB reduction in the intruder's acoustic signature roughly doubles the required fleet in the simulations, for example from 53 to 110 defenders for 99% detection at an intruder speed of 25 km/h."}}
+  ]
+}
+</script>
+
+<style>
+:root{
+  --bg:#0b1030; --bg2:#101745; --line:#27306e; --ink:#eef1ff; --mut:#a3abdc;
+  --cy:#4fe3ff; --pk:#ff5c8a; --am:#ffc857;
+  --disp:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Hanken Grotesk","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0)}
+a{color:var(--cy);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--am);outline-offset:3px;border-radius:4px}
+.wrap{width:min(1120px,100% - 40px);margin-inline:auto}
+h1,h2,h3{font-family:var(--disp);line-height:1.02;margin:0;letter-spacing:-.02em}
+h2{font-size:clamp(2rem,4.6vw,3.4rem);font-weight:800;max-width:18ch}
+h3{font-size:1.35rem;font-weight:700;letter-spacing:-.01em}
+p{margin:0 0 1em}
+.lede{font-size:1.2rem;color:var(--mut);max-width:60ch}
+section{padding:clamp(72px,10vw,130px) 0;border-top:1px solid var(--line)}
+.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;background:var(--am);color:#000;padding:8px 12px;z-index:99}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(11,16,48,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+nav .brand{font:800 1.05rem var(--disp);color:var(--ink);text-decoration:none;margin-right:auto}
+nav a.l{color:var(--mut);text-decoration:none;font-size:.95rem}
+nav a.l:hover{color:var(--ink)}
+@media(max-width:720px){nav a.l{display:none}}
+.btn{display:inline-flex;align-items:center;gap:8px;font:600 .98rem var(--body);padding:12px 20px;border-radius:999px;text-decoration:none;border:1.5px solid var(--cy);color:var(--cy);cursor:pointer;background:transparent;transition:background .15s,color .15s}
+.btn:hover{background:rgba(79,227,255,.12)}
+.btn.solid{background:var(--cy);color:#04102a}
+.btn.solid:hover{background:#8bedff}
+.btn.sm{padding:8px 16px;font-size:.9rem}
+
+/* hero */
+.hero{border-top:0;padding-top:clamp(56px,8vw,110px);padding-bottom:0}
+.status{display:inline-block;font-size:.9rem;color:var(--am);border:1px solid rgba(255,200,87,.5);border-radius:999px;padding:4px 14px;margin-bottom:26px}
+h1{font-size:clamp(3.2rem,10.5vw,8.6rem);font-weight:800;letter-spacing:-.045em;line-height:.9}
+h1 span{display:block}
+h1 .b{color:var(--cy)}
+.hero .lede{margin:30px 0 32px}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.authors{margin-top:38px;color:var(--mut);font-size:.95rem;max-width:80ch}
+.authors b{color:var(--ink);font-weight:600}
+.stage{position:relative;margin-top:56px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#0d1440,#0a0f2b)}
+.stage canvas{display:block;width:100%;height:clamp(300px,46vw,520px)}
+.ctrl{display:grid;grid-template-columns:1fr auto;gap:8px 28px;align-items:end;padding:18px 22px;border-top:1px solid var(--line);background:rgba(11,16,48,.7)}
+.ctrl label{font-weight:600}
+.ctrl output{font:600 1rem var(--mono);color:var(--cy)}
+.ctrl .read{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px 24px;color:var(--mut);font-size:.9rem}
+input[type=range]{width:100%;accent-color:var(--cy);height:32px;grid-column:1/-1}
+.cap{position:absolute;top:12px;left:16px;font-size:.82rem;color:var(--mut);pointer-events:none}
+.key{position:absolute;top:12px;right:16px;display:flex;gap:14px;font-size:.82rem;color:var(--mut);pointer-events:none}
+.key i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+
+/* big numbers */
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));border-top:1px solid var(--line);margin-top:0}
+.num{padding:34px 26px 34px 0;border-right:1px solid var(--line)}
+.num:last-child{border-right:0}
+.num strong{display:block;font:800 clamp(3rem,6vw,4.8rem)/1 var(--disp);letter-spacing:-.04em}
+.num p{color:var(--mut);margin:.5em 0 0;max-width:26ch}
+.num.cy strong{color:var(--cy)}.num.pk strong{color:var(--pk)}.num.am strong{color:var(--am)}
+@media(max-width:700px){.num{border-right:0;border-bottom:1px solid var(--line);padding-left:0}}
+
+/* two-col text */
+.two{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(28px,6vw,90px);align-items:start}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.two h2{margin-bottom:22px}
+
+/* dilemma pair */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:56px;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.pair>div{padding:30px}
+.pair>div+div{border-left:1px solid var(--line);background:var(--bg2)}
+@media(max-width:760px){.pair{grid-template-columns:1fr}.pair>div+div{border-left:0;border-top:1px solid var(--line)}}
+.pair h3{margin-bottom:10px}
+.pair .tag{font-size:.9rem;color:var(--mut)}
+
+/* chart */
+figure{margin:0}
+figcaption{color:var(--mut);font-size:.9rem;margin-top:12px;max-width:80ch}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--mut);font:12px var(--body)}
+.chart .g{stroke:var(--line);stroke-width:1}
+.chart .ln{fill:none;stroke:var(--cy);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.chart .dot{fill:var(--cy)}
+.chart .t95{stroke:var(--am);stroke-dasharray:5 5}
+.chart .t99{stroke:var(--pk);stroke-dasharray:5 5}
+.chart .lab{fill:var(--ink);font-weight:600;font-size:13px}
+
+/* calculator */
+.calc{margin-top:48px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:0;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+@media(max-width:860px){.calc{grid-template-columns:1fr}}
+.calc .in{padding:30px;background:var(--bg2)}
+.calc .out{padding:30px;position:relative;min-height:340px;border-left:1px solid var(--line)}
+@media(max-width:860px){.calc .out{border-left:0;border-top:1px solid var(--line)}}
+.calc .n{font:800 clamp(3.4rem,8vw,6rem)/1 var(--disp);letter-spacing:-.04em;color:var(--pk)}
+.calc .rows{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;color:var(--mut);margin-top:14px;font-size:.98rem}
+.calc .rows b{color:var(--ink);font-weight:600;font-family:var(--mono);font-size:.95rem}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 4px}
+.presets button{font:500 .88rem var(--body);color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer}
+.presets button:hover,.presets button[aria-pressed=true]{border-color:var(--cy);color:var(--cy)}
+#grid{margin-top:22px;width:100%;height:120px;border:1px dashed var(--line);border-radius:8px}
+
+/* bars */
+.bars{display:grid;gap:34px;margin-top:48px}
+.bar-group h3{margin-bottom:14px;font-size:1.1rem}
+.row{display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:center;margin:8px 0;font-size:.95rem;color:var(--mut)}
+.track{height:26px;position:relative;background:rgba(255,255,255,.04);border-radius:6px}
+.fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:9px;font:600 .82rem var(--mono);color:#04102a;min-width:34px}
+.f1{background:var(--cy)}.f2{background:var(--pk)}.f3{background:var(--am)}
+@media(max-width:560px){.row{grid-template-columns:90px 1fr}}
+
+/* archetype table */
+table{border-collapse:collapse;width:100%;margin-top:40px;font-size:.98rem}
+th,td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:500;font-size:.9rem}
+td:last-child,th:last-child{text-align:right}
+.tw{overflow-x:auto}
+
+/* speed track */
+.speed{position:relative;height:96px;margin:50px 0 10px;border-bottom:2px solid var(--line)}
+.speed .pt{position:absolute;bottom:-7px;transform:translateX(-50%);text-align:center;font-size:.9rem;width:150px}
+.speed .pt::after{content:"";display:block;width:14px;height:14px;border-radius:50%;margin:8px auto 0;background:var(--c)}
+.speed .pt b{display:block;font:800 1.6rem var(--disp);color:var(--c);letter-spacing:-.02em}
+.speed .ax{position:absolute;bottom:-30px;font-size:.8rem;color:var(--mut)}
+
+/* method */
+.steps{list-style:none;padding:0;margin:44px 0 0;counter-reset:s;display:grid;gap:0}
+.steps li{counter-increment:s;display:grid;grid-template-columns:56px 1fr;gap:18px;padding:24px 0;border-top:1px solid var(--line)}
+.steps li::before{content:counter(s);font:800 2rem var(--disp);color:var(--cy)}
+.steps h3{margin-bottom:6px}
+.steps p{margin:0;color:var(--mut);max-width:70ch}
+code,.eq{font-family:var(--mono);font-size:.92em;color:var(--am)}
+
+/* limits */
+.lim{columns:2 360px;column-gap:56px;margin-top:36px;padding:0;list-style:none}
+.lim li{break-inside:avoid;padding:0 0 22px 26px;position:relative;color:var(--mut)}
+.lim li::before{content:"";position:absolute;left:0;top:.62em;width:12px;height:2px;background:var(--pk)}
+.lim b{color:var(--ink);font-weight:600}
+
+/* faq */
+details{border-top:1px solid var(--line);padding:20px 0}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font:700 1.2rem var(--disp);list-style:none;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--cy);font-size:1.5rem;line-height:1}
+details[open] summary::after{content:"–"}
+details p{margin:14px 0 0;color:var(--mut);max-width:72ch}
+
+/* cite */
+pre{background:#070b24;border:1px solid var(--line);border-radius:12px;padding:20px;overflow-x:auto;font:.86rem/1.6 var(--mono);color:var(--ink);margin:24px 0 16px}
+footer{padding:48px 0 calc(48px + env(safe-area-inset-bottom,0));border-top:1px solid var(--line);color:var(--mut);font-size:.92rem}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav aria-label="Primary">
+  <div class="wrap">
+    <a class="brand" href="#top">Fight Drones with Drones</a>
+    <a class="l" href="#dilemma">The dilemma</a>
+    <a class="l" href="#calculator">Calculator</a>
+    <a class="l" href="#results">Results</a>
+    <a class="l" href="#faq">FAQ</a>
+    <a class="btn sm solid" href="assets/paper.pdf">Read the paper</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <span class="status">Manuscript · ESORICS 2026 submission</span>
+    <h1><span>Fight drones</span><span class="b">with drones.</span></h1>
+    <p class="lede">Put microphones on a patrolling swarm and it turns a fixed listening post into a moving acoustic curtain. On a 500 × 200 m boundary, about 40 patrol drones reach the 99% detection that a static grid buys with more than 400.</p>
+    <div class="cta">
+      <a class="btn solid" href="assets/paper.pdf">Read the paper (PDF)</a>
+      <a class="btn" href="https://github.com/ilsamaritano/BoundaryDefense">Code &amp; data</a>
+      <a class="btn" href="#cite">Cite</a>
+    </div>
+    <p class="authors"><b>Vincenzo Sammartino</b> (KAUST, University of Pisa), <b>Nathanaël Denis</b>, <b>Omar Ibrahim</b>, <b>Roberto Di Pietro</b> — King Abdullah University of Science and Technology (KAUST), Thuwal, Saudi Arabia</p>
+
+    <div class="stage">
+      <canvas id="sim" role="img" aria-label="Animated schematic: a row of defender drones patrols a boundary wall while intruder drones approach from below. Defenders show detection circles that shrink as patrol speed increases."></canvas>
+      <div class="cap">Schematic, not to scale</div>
+      <div class="key"><span><i style="background:var(--cy)"></i>defender</span><span><i style="background:var(--pk)"></i>intruder</span></div>
+      <div class="ctrl">
+        <label for="spd">Patrol speed</label>
+        <output id="spdOut" for="spd">9.2 km/h</output>
+        <input type="range" id="spd" min="0" max="36" step="0.2" value="9.2">
+        <div class="read">
+          <span>Detection radius per drone: <b id="rad" style="color:var(--ink)">—</b></span>
+          <span>Try 9.2 (energy-optimal) and 35.4 (detection-optimal)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap" style="margin-top:0">
+    <div class="nums">
+      <div class="num pk"><strong>403</strong><p>hovering drones for a gap-free static grid on 500 × 200 m</p></div>
+      <div class="num cy"><strong>~40</strong><p>patrolling drones for 99% detection at 35.4 km/h</p></div>
+      <div class="num am"><strong>9.2</strong><p>km/h patrol speed that minimizes fleet for 24-hour coverage</p></div>
+      <div class="num"><strong>2×</strong><p>fleet needed when the intruder is 6 dB quieter</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHY ================= -->
+<section id="why">
+  <div class="wrap two">
+    <div>
+      <h2>One cheap drone can shut an airport.</h2>
+    </div>
+    <div>
+      <p class="lede" style="margin-bottom:1.2em">Gatwick, December 2018: roughly 1,000 flights grounded over 33 hours. Abqaiq–Khurais, 2019: Saudi crude output temporarily halved. Consumer multirotors cost a few hundred dollars and slip under low-altitude radar.</p>
+      <p>Radar loses small targets near the ground, RF analysis is blind to autonomous drones, and cameras struggle at night and in fog. Passive acoustic sensing fills the gap: every multirotor makes noise, and listening needs no emitted signal and is largely unaffected by weather. But ground-mounted arrays are fixed and reach only 300–500 m at best.</p>
+      <p>This paper asks a different question: what if the microphones fly?</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DILEMMA ================= -->
+<section id="dilemma">
+  <div class="wrap">
+    <h2>Fly faster, hear less.</h2>
+    <p class="lede" style="margin-top:22px">A patrolling drone covers more of the boundary, but its own rotors get louder as it speeds up. Since fleet size scales with the inverse square of detection range, lost range is costly. The authors call this the Defender's Dilemma.</p>
+
+    <div class="pair">
+      <div>
+        <h3>The defender's dilemma</h3>
+        <p class="tag">Sensor gets noisier as it moves</p>
+        <p>Forward flight raises ego-noise. Spectral subtraction against a fingerprint of the drone's own noise cuts the floor by 13.0 dB, stretching the range from about 2 m to 9.1 m for a Mavic Air 2 at 28.8 km/h.</p>
+        <p style="margin:0">Halve the detection range and you need four times the drones to tile the wall.</p>
+      </div>
+      <div>
+        <h3>The attacker's dilemma</h3>
+        <p class="tag">Fast is loud, slow is exposed</p>
+        <p>Every intruder archetype has one speed that minimizes its chance of being heard. Go slower and dwell time inside range goes up. Go faster and the source level grows faster than exposure shrinks.</p>
+        <p style="margin:0">A fixed-wing VTOL keeps detection below 40% at its best speed. A racing FPV drone is heard over 90% of the time at any speed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CALCULATOR ================= -->
+<section id="calculator">
+  <div class="wrap">
+    <h2>Size a static grid in seconds.</h2>
+    <p class="lede" style="margin-top:22px">The paper tiles the wall with spacing D = 1.6 × R<sub>det</sub> (20% footprint overlap) and counts N = ⌈W<sub>y</sub>/D⌉ × ⌈(W<sub>z</sub>−z<sub>min</sub>)/D⌉. Change the detection range or wall and watch the quadratic law bite.</p>
+
+    <div class="calc">
+      <div class="in">
+        <div class="presets" role="group" aria-label="Intruder presets (defender hovering, SNR threshold 3 dB)">
+          <button type="button" data-r="10.1">Mavic Air 2 @ 15 km/h</button>
+          <button type="button" data-r="9.1">Mavic Air 2 @ 28.8</button>
+          <button type="button" data-r="6.2">Mavic 3 @ 28.8</button>
+          <button type="button" data-r="47.3">FPV racing @ 28.8</button>
+          <button type="button" data-r="2.7">Fixed-wing VTOL @ 28.8</button>
+        </div>
+        <p style="font-size:.88rem;color:var(--mut);margin:6px 0 22px">Presets use the detection ranges reported in the paper's Table 2 and Eq. (6) example.</p>
+
+        <label for="R">Detection range R<sub>det</sub>: <b id="Rv" style="font-family:var(--mono);color:var(--cy)">10.1 m</b></label>
+        <input type="range" id="R" min="2" max="60" step="0.1" value="10.1">
+        <label for="Wy">Wall length: <b id="Wyv" style="font-family:var(--mono);color:var(--cy)">500 m</b></label>
+        <input type="range" id="Wy" min="100" max="2000" step="50" value="500">
+        <label for="Wz">Altitude span: <b id="Wzv" style="font-family:var(--mono);color:var(--cy)">200 m</b></label>
+        <input type="range" id="Wz" min="20" max="400" step="10" value="200">
+      </div>
+      <div class="out" aria-live="polite">
+        <div>Drones for a gap-free static wall</div>
+        <div class="n" id="N">403</div>
+        <div class="rows">
+          <span>Grid spacing D</span><b id="D">16.2 m</b>
+          <span>Grid</span><b id="G">31 × 13</b>
+          <span>Vs. the 10× mobile fleet</span><b id="M">≈ 40 (99% detection)*</b>
+        </div>
+        <svg id="grid" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <p style="font-size:.82rem;color:var(--mut);margin:12px 0 0">*The ~10× reduction is the paper's result for the 500 × 200 m Mavic Air 2 @ 15 km/h scenario at 35.4 km/h patrol. It does not transfer to other settings.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESULTS ================= -->
+<section id="results">
+  <div class="wrap">
+    <h2>What the Monte Carlo runs say.</h2>
+    <p class="lede" style="margin-top:22px">Up to one million replications per point, an acoustic model calibrated on real DJI Mavic Air 2 and Mini 3 Pro flights, and 95% Wilson confidence intervals.</p>
+
+    <figure style="margin-top:56px">
+      <h3 style="margin-bottom:6px">Patrol speed vs. detection probability</h3>
+      <svg class="chart" viewBox="0 0 640 310" role="img" aria-labelledby="c1t c1d">
+        <title id="c1t">Detection probability rises with defender patrol speed</title>
+        <desc id="c1d">Starts at 77% for a static grid, dips to about 67% near 4 km/h, then climbs to 95% at 29.4 km/h and 99% at 35.4 km/h, plateauing near 99.5%.</desc>
+        <g>
+          <line class="g" x1="60" x2="600" y1="260" y2="260"/><line class="g" x1="60" x2="600" y1="200" y2="200"/>
+          <line class="g" x1="60" x2="600" y1="140" y2="140"/><line class="g" x1="60" x2="600" y1="80" y2="80"/><line class="g" x1="60" x2="600" y1="20" y2="20"/>
+          <text x="50" y="264" text-anchor="end">60%</text><text x="50" y="204" text-anchor="end">70%</text><text x="50" y="144" text-anchor="end">80%</text><text x="50" y="84" text-anchor="end">90%</text><text x="50" y="24" text-anchor="end">100%</text>
+          <text x="60" y="282" text-anchor="middle">0</text><text x="180" y="282" text-anchor="middle">10</text><text x="300" y="282" text-anchor="middle">20</text><text x="420" y="282" text-anchor="middle">30</text><text x="540" y="282" text-anchor="middle">40</text>
+          <text x="330" y="304" text-anchor="middle">Defender patrol speed (km/h)</text>
+        </g>
+        <line class="t95" x1="60" x2="600" y1="50" y2="50"/><line class="t99" x1="60" x2="600" y1="26" y2="26"/>
+        <text x="596" y="44" text-anchor="end" style="fill:var(--am)">95% target</text>
+        <text x="596" y="20" text-anchor="end" style="fill:var(--pk)">99% target</text>
+        <polyline class="ln" points="60,158 84,188 108,218 132,209 156,200 180,194 240,167 300,131 348,92 384,71 412.8,50 484.8,26 540,23 600,23"/>
+        <circle class="dot" cx="60" cy="158" r="5"/><circle class="dot" cx="108" cy="218" r="5"/><circle class="dot" cx="412.8" cy="50" r="5"/><circle class="dot" cx="484.8" cy="26" r="5"/>
+        <text class="lab" x="70" y="150">77% static</text>
+        <text class="lab" x="118" y="236">≈67% trough</text>
+        <text class="lab" x="330" y="66" >29.4 km/h → 95%</text>
+        <text class="lab" x="440" y="46">35.4 km/h → 99%</text>
+      </svg>
+      <figcaption>Redrawn from Fig. 4 (Exp. 3): the anchor points and labeled values are the paper's numbers; the segments between them are approximate. Mavic Air 2 intruder at 15 km/h. Mobilizing the formation adds 22 percentage points over the static baseline.</figcaption>
+    </figure>
+
+    <div class="bars">
+      <div class="bar-group">
+        <h3>Fleet needed for 99% detection (static grid, Exp. 2 &amp; 4)</h3>
+        <p style="color:var(--mut);font-size:.95rem;margin-bottom:16px">Baseline Mavic Air 2 vs. the same drone made 6 dB quieter.</p>
+        <div class="row"><span>25 km/h</span><div class="track"><div class="fill f1" style="width:38.1%">53</div></div></div>
+        <div class="row"><span>25 km/h, −6 dB</span><div class="track"><div class="fill f2" style="width:79.1%">110</div></div></div>
+        <div class="row"><span>15 km/h</span><div class="track"><div class="fill f1" style="width:46%">64</div></div></div>
+        <div class="row"><span>15 km/h, −6 dB</span><div class="track"><div class="fill f2" style="width:100%">139</div></div></div>
+        <div class="row"><span>5 km/h</span><div class="track"><div class="fill f1" style="width:48.9%">68</div></div></div>
+        <div class="row"><span>5 km/h, −6 dB</span><div class="track"><div class="fill f2" style="width:91.4%">127</div></div></div>
+      </div>
+      <p style="color:var(--mut);max-width:70ch;margin:0">Each extra "nine" is expensive: going from 99% to 99.9% needs roughly 50% more drones, and 99% needs about 1.5× the fleet of 95%. A modest gain in intruder stealth forces a near-doubling of the fleet, which is why the attacker model is a first-class sizing parameter.</p>
+    </div>
+
+    <h3 style="margin-top:72px">Four intruder archetypes</h3>
+    <div class="tw">
+    <table>
+      <thead><tr><th>Platform</th><th>Hover level L₀ (dB SPL)</th><th>Speed gain (dB·h/km)</th><th>Mass</th><th>R<sub>det</sub> at 28.8 km/h</th></tr></thead>
+      <tbody>
+        <tr><td>Mavic Air 2</td><td>81.5</td><td>0.22</td><td>0.57 kg</td><td>9.1 m</td></tr>
+        <tr><td>Mavic 3</td><td>79.0</td><td>0.19</td><td>0.895 kg</td><td>6.2 m</td></tr>
+        <tr><td>FPV racing</td><td>88.0</td><td>0.50</td><td>0.30 kg</td><td>47.3 m</td></tr>
+        <tr><td>Fixed-wing VTOL</td><td>75.0</td><td>0.08</td><td>2.5 kg</td><td>2.7 m</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="color:var(--mut);font-size:.9rem;margin-top:14px">Defender: DJI Mini 3 Pro (249 g). Values from Table 2 of the paper.</p>
+  </div>
+</section>
+
+<!-- ================= ENERGY ================= -->
+<section id="energy">
+  <div class="wrap">
+    <h2>The fastest patrol is not the cheapest.</h2>
+    <p class="lede" style="margin-top:22px">Measured on a Mini 3 Pro, power rises from about 25 W at hover to 45 W at 35 km/h, and endurance falls from 42.6 to roughly 23 minutes. Add battery rotation for 24-hour coverage and the fleet-minimizing speed lands far below the detection optimum.</p>
+
+    <div class="speed" role="img" aria-label="Speed axis from 0 to 36 kilometers per hour with markers at 9.2 (energy-optimal) and 35.4 (detection-optimal).">
+      <div class="pt" style="left:25.6%;--c:var(--am)"><b>9.2 km/h</b>energy-optimal<br>≈20 airborne, ≈30 total</div>
+      <div class="pt" style="left:98%;--c:var(--cy);transform:translateX(-90%)"><b>35.4 km/h</b>99% detection<br>≈3× the total fleet</div>
+      <span class="ax" style="left:0">0 km/h</span><span class="ax" style="right:0">36</span>
+    </div>
+
+    <div class="two" style="margin-top:96px">
+      <div>
+        <h3>Cost, honestly</h3>
+      </div>
+      <div>
+        <p>At the energy-optimal speed the airframe bill for a 500 × 200 m boundary is under $12,000 (about 30 Mini 3 Pro units at roughly $400). That is hardware only. It excludes deployment, operations, charging infrastructure, and the response system.</p>
+        <p>Rule of thumb from the paper: short high-alert missions patrol near 30–35 km/h; sustained perimeter duty patrols near 9.2 km/h.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= METHOD ================= -->
+<section id="method">
+  <div class="wrap">
+    <h2>How the model was built.</h2>
+    <ol class="steps">
+      <li><div><h3>Fly real drones</h3><p>A Mavic Air 2 intruder flew straight passes at 0–47.2 km/h while two Mini 3 Pro defenders hovered at 5.4–5.9 m with onboard microphones. 390 s of intruder flight produced 3,904 synchronized telemetry frames.</p></div></li>
+      <li><div><h3>Cancel the drone's own noise</h3><p>Build a spectral fingerprint of the defender's ego-noise from clean segments, then subtract it (<code>Ŝ<sub>int</sub> = max(S<sub>rx</sub> − βŜ<sub>ego</sub>, δŜ<sub>ego</sub>)</code>). Net reduction: 13.0 dB. Detection range grows about 4.5×.</p></div></li>
+      <li><div><h3>Fit an acoustic model</h3><p>Source level grows with speed up to a plateau; sound spreads with distance and atmospheric absorption. A drone detects when received level minus its ego-noise floor exceeds an SNR threshold of 3 dB. Validation: ROC AUC 0.91, mean range error 1.14 m.</p></div></li>
+      <li><div><h3>Simulate the wall</h3><p>Defenders sit on a gap-free grid with spring-tethered Brownian position noise (σ = 0.3 m). A vectorized NumPy engine runs about 19,000 replications per second per core across straight, zigzag, evasive, and altitude-change intruder trajectories.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= LIMITS ================= -->
+<section id="limits">
+  <div class="wrap">
+    <h2>What this does not claim.</h2>
+    <p class="lede" style="margin-top:22px">Results come from a calibrated simulation of a specific hardware pairing. Read them as sizing guidance, not a field-proven system.</p>
+    <ul class="lim">
+      <li><b>Calm, open-air conditions.</b> Wind, rain, humidity, and urban noise (55–75 dB(A)) would shrink detection range and raise fleet needs.</li>
+      <li><b>Detection only.</b> No jamming, capture, or other response is modeled.</li>
+      <li><b>Zero-knowledge attacker.</b> An adversary who times a crossing at a coverage gap, or floods the area with decoy emitters, needs a game-theoretic treatment.</li>
+      <li><b>Crossing ambiguity.</b> A single-altitude wall cannot tell an intruder that crossed from one that approached and turned back.</li>
+      <li><b>Multi-defender interference.</b> Friendly-drone noise in close formation is handled with fingerprint whitelisting, but its effect on range is future work.</li>
+      <li><b>Single-platform calibration.</b> One intruder and one defender model were measured; the other archetypes use parametric extrapolation.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq">
+  <div class="wrap">
+    <h2>Questions people ask.</h2>
+    <div style="margin-top:44px">
+      <details><summary>Can drones detect other drones by sound?</summary><p>Yes. Every multirotor radiates broadband propeller noise, and it is detectable passively. The difficulty on a flying platform is ego-noise from its own rotors. Spectral subtraction against a calibrated fingerprint cut the noise floor by 13 dB in these experiments.</p></details>
+      <details><summary>How many drones does it take to protect a 500 × 200 m perimeter?</summary><p>About 403 hovering drones seal the wall with no gaps. Patrolling at 35.4 km/h, a fleet roughly ten times smaller reaches 99% detection. For continuous 24-hour operation the paper's energy-optimal setup uses about 20 airborne drones and about 30 in total.</p></details>
+      <details><summary>What is the best patrol speed?</summary><p>It depends on mission length. Detection crosses 95% at 29.4 km/h and 99% at 35.4 km/h, so short high-alert missions favor 30–35 km/h. Sustained missions favor 9.2 km/h to keep battery swaps, and therefore total fleet, low.</p></details>
+      <details><summary>Why does a 6 dB quieter intruder double the fleet?</summary><p>A quieter source is audible from less far away, so each defender's footprint shrinks and more of them are needed. In the simulations the 99% fleet rose from 53 to 110 at an intruder speed of 25 km/h.</p></details>
+      <details><summary>Does it work in wind or in a city?</summary><p>Not established. All experiments were done in calm, clear, open-air conditions. Ambient urban noise and wind would reduce detection range, and the authors list weather-dependent bounds as future work.</p></details>
+      <details><summary>Where are the code and data?</summary><p>At <a href="https://github.com/ilsamaritano/BoundaryDefense">github.com/ilsamaritano/BoundaryDefense</a>. The paper notes that access is for reviewers for now, with a Zenodo release planned upon acceptance.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CITE ================= -->
+<section id="cite">
+  <div class="wrap">
+    <h2>Cite it.</h2>
+    <p class="lede" style="margin-top:22px">Update the venue and year once the final version is published.</p>
+<pre id="bib">@inproceedings{sammartino2026fightdrones,
+  title     = {Fight Drones with Drones: Detecting Aerial Perimeter
+               Intrusion using Drone-mounted Microphones},
+  author    = {Sammartino, Vincenzo and Denis, Nathana{\"e}l and
+               Ibrahim, Omar and Di Pietro, Roberto},
+  year      = {2026},
+  note      = {Manuscript under review}
+}</pre>
+    <button class="btn" id="copy" type="button">Copy BibTeX</button>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 The authors. KAUST · CEMSE, Thuwal, Saudi Arabia · Università di Pisa, Dipartimento di Informatica.</span>
+    <span><a href="assets/paper.pdf">PDF</a> · <a href="https://github.com/ilsamaritano/BoundaryDefense">GitHub</a></span>
+  </div>
+</footer>
+
+<script>
+/* ---------- Hero simulation (illustrative only) ---------- */
+(function(){
+  const cv=document.getElementById('sim'),ctx=cv.getContext('2d');
+  const sl=document.getElementById('spd'),out=document.getElementById('spdOut'),radEl=document.getElementById('rad');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H,dpr,N=9,def=[],intr=[],last=0,spawn=0,t=0;
+  const rFactor=v=>1-0.62*Math.min(v,36)/36;      // schematic: range shrinks with speed
+  function resize(){
+    dpr=Math.min(devicePixelRatio||1,2);
+    const r=cv.getBoundingClientRect();W=r.width;H=r.height;
+    cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    def=[];for(let i=0;i<N;i++)def.push({x:(i+.5)*W/N,ph:Math.random()*6.28,trail:[]});
+  }
+  addEventListener('resize',resize);resize();
+  function upd(){
+    const v=+sl.value;out.textContent=v.toFixed(1)+' km/h';
+    radEl.textContent=Math.round(rFactor(v)*100)+'% of hover range';
+  }
+  sl.addEventListener('input',upd);upd();
+  function drawDrone(x,y,c,s){
+    ctx.strokeStyle=c;ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(x-s,y-s);ctx.lineTo(x+s,y+s);ctx.moveTo(x+s,y-s);ctx.lineTo(x-s,y+s);ctx.stroke();
+    ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,s*.5,0,6.28);ctx.fill();
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>{ctx.beginPath();ctx.arc(x+a*s,y+b*s,s*.42,0,6.28);ctx.stroke();});
+  }
+  function frame(ts){
+    const dt=Math.min((ts-last)/1000||0,.05);last=ts;t+=dt;
+    const v=+sl.value,s=W/N,r0=s*.26,r=r0*rFactor(v),wallY=H*.4;
+    const amp=s*.5*Math.min(1,v/18),om=.4+v*.16;
+    ctx.clearRect(0,0,W,H);
+    // wall line
+    ctx.strokeStyle='rgba(163,171,220,.35)';ctx.setLineDash([6,8]);ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(0,wallY);ctx.lineTo(W,wallY);ctx.stroke();ctx.setLineDash([]);
+    // defenders
+    def.forEach((d,i)=>{
+      d.ph+=om*dt;const x=(i+.5)*s+amp*Math.sin(d.ph),y=wallY+Math.sin(t*1.1+i)*3;
+      d.cx=x;d.cy=y;d.trail.push(x);if(d.trail.length>28)d.trail.shift();
+      // swept trail
+      ctx.fillStyle='rgba(79,227,255,.05)';
+      d.trail.forEach((tx,k)=>{ctx.beginPath();ctx.arc(tx,y,r,0,6.28);ctx.fill();});
+      ctx.fillStyle='rgba(79,227,255,.10)';ctx.strokeStyle='rgba(79,227,255,.55)';ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.arc(x,y,r,0,6.28);ctx.fill();ctx.stroke();
+      drawDrone(x,y,'#4fe3ff',5);
+    });
+    // intruders
+    spawn-=dt;if(spawn<=0&&!reduce){spawn=1.5+Math.random()*1.2;intr.push({x:Math.random()*W,y:H+10,st:'in',age:0});}
+    if(reduce&&!intr.length){intr.push({x:W*.5,y:H*.72,st:'in',age:0});}
+    intr.forEach(o=>{
+      o.age+=dt;
+      if(o.st==='in'&&!reduce){
+        o.y-=(H*.2)*dt;
+        for(const d of def){if(Math.hypot(o.x-d.cx,o.y-d.cy)<r){o.st='hit';o.age=0;break;}}
+        if(o.y<wallY-14){o.st='miss';o.age=0;}
+      }
+      const fade=o.st==='in'?1:Math.max(0,1-o.age/1.4);
+      ctx.globalAlpha=fade;
+      // sound rings
+      if(o.st==='in'){for(let k=0;k<2;k++){const p=((t*.6+k*.5)%1);ctx.strokeStyle='rgba(255,92,138,'+(.28*(1-p))+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(o.x,o.y,6+p*34,0,6.28);ctx.stroke();}}
+      drawDrone(o.x,o.y,o.st==='miss'?'#8a90b8':'#ff5c8a',5);
+      if(o.st==='hit'){ctx.strokeStyle='#ffc857';ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.x,o.y,10+o.age*70,0,6.28);ctx.stroke();
+        ctx.fillStyle='#ffc857';ctx.font='600 12px system-ui,sans-serif';ctx.fillText('detected',o.x+14,o.y-10);}
+      if(o.st==='miss'){ctx.fillStyle='#a3abdc';ctx.font='600 12px system-ui,sans-serif';ctx.fillText('gap',o.x+14,o.y-10);}
+      ctx.globalAlpha=1;
+    });
+    intr=intr.filter(o=>(o.st==='in'&&o.y>-20)||(o.st!=='in'&&o.age<1.4)||reduce);
+    if(!reduce)requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if(reduce)sl.addEventListener('input',()=>requestAnimationFrame(frame));
+})();
+
+/* ---------- Fleet calculator (Eq. 6 of the paper) ---------- */
+(function(){
+  const $=id=>document.getElementById(id);
+  const R=$('R'),Wy=$('Wy'),Wz=$('Wz'),g=$('grid');
+  const btns=[...document.querySelectorAll('.presets button')];
+  function calc(){
+    const r=+R.value,wy=+Wy.value,wz=+Wz.value,D=1.6*r;
+    const a=Math.ceil(wy/D),b=Math.ceil(wz/D),n=a*b;
+    $('Rv').textContent=r.toFixed(1)+' m';$('Wyv').textContent=wy+' m';$('Wzv').textContent=wz+' m';
+    $('N').textContent=n.toLocaleString('en-US');
+    $('D').textContent=D.toFixed(1)+' m';$('G').textContent=a+' × '+b;
+    const m=(r===10.1&&wy===500&&wz===200);
+    $('M').textContent=m?'≈ 40 (99% detection)*':'n/a for this setting';
+    btns.forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.r===r)));
+    // grid preview (capped for legibility)
+    const ca=Math.min(a,60),cb=Math.min(b,24);let h='';
+    for(let i=0;i<ca;i++)for(let j=0;j<cb;j++){h+='<circle cx="'+(((i+.5)/ca)*400).toFixed(1)+'" cy="'+(((j+.5)/cb)*120).toFixed(1)+'" r="'+Math.max(.9,Math.min(3.2,180/Math.max(ca,cb*3)))+'" fill="#4fe3ff"/>';}
+    g.innerHTML=h;
+  }
+  [R,Wy,Wz].forEach(e=>e.addEventListener('input',calc));
+  btns.forEach(b=>b.addEventListener('click',()=>{R.value=b.dataset.r;if(b.dataset.r==='10.1'){Wy.value=500;Wz.value=200;}calc();}));
+  calc();
+})();
+
+/* ---------- Copy BibTeX ---------- */
+document.getElementById('copy').addEventListener('click',function(){
+  const t=document.getElementById('bib').textContent,b=this;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy BibTeX',1800);}).catch(()=>{b.textContent='Select the text above and copy';});
+});
+</script>
+</body>
+</html>
